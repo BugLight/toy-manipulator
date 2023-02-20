@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(toy-manipulator-firmware C ASM)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=nosys.specs -T ${CMAKE_SOURCE_DIR}/STM32F103XB_FLASH.ld")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-m3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -mcpu=cortex-m3 -mfloat-abi=soft")
 
 include_directories(inc/)
 include_directories(stm32f1xx_hal_driver/Inc)
