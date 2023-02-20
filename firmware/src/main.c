@@ -1,27 +1,61 @@
-#include <stm32f103xb.h>
+#include <stm32f1xx.h>
 
-void HardFault_Handler() {
-    // Stub hard fault handler
-    while (1) {}
-}
+void SystemClock_Config(void);
 
-void Delay(unsigned t) {
-    // TODO: Use Sys Clock instead
-    volatile unsigned i = 0;
-    for (; i < t; ++i);
-}
+void GPIO_Config(void);
 
-int main() {
-    // Blinks the led just for now
-    RCC->APB2ENR |= (1ul << 4);
+int main(void) {
+    HAL_Init();
 
-    GPIOC->CRH &= ~(0xFul << 20);
-    GPIOC->CRH |= 0x6ul << 20;
+    SystemClock_Config();
+    GPIO_Config();
+
     while (1) {
-        GPIOC->BSRR |= 1ul << 13;
-        Delay(500000);
-        GPIOC->BRR |= 1ul << 13;
-        Delay(500000);
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        HAL_Delay(500);
     }
     return 0;
+}
+
+void SystemClock_Config(void) {
+    RCC_OscInitTypeDef oscInitStruct = {
+        .HSIState = RCC_HSI_ON,
+        .HSEState = RCC_HSE_OFF,
+        .LSEState = RCC_LSE_OFF,
+        .LSIState = RCC_LSI_OFF,
+        .HSEPredivValue = RCC_HSE_PREDIV_DIV1,
+        .OscillatorType = RCC_OSCILLATORTYPE_HSI,
+        .HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT,
+        .PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2,
+        .PLL.PLLState = RCC_PLL_ON,
+        .PLL.PLLMUL = RCC_PLL_MUL16
+    };
+
+    RCC_ClkInitTypeDef clkInitStruct = {
+        .ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2,
+        .SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK,
+        .AHBCLKDivider = RCC_SYSCLK_DIV1,
+        .APB1CLKDivider = RCC_HCLK_DIV2,
+        .APB2CLKDivider = RCC_HCLK_DIV1
+    };
+
+    if (HAL_RCC_OscConfig(&oscInitStruct) != HAL_OK) {
+        while (1);
+    }
+
+    if (HAL_RCC_ClockConfig(&clkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
+        while (1);
+    }
+}
+
+void GPIO_Config(void) {
+    GPIO_InitTypeDef gpioInitStruct = {
+        .Pin = GPIO_PIN_13,
+        .Mode = GPIO_MODE_OUTPUT_PP,
+        .Pull = GPIO_NOPULL,
+        .Speed = GPIO_SPEED_FREQ_LOW
+    };
+
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    HAL_GPIO_Init(GPIOC, &gpioInitStruct);
 }
