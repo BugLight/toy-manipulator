@@ -1,17 +1,9 @@
-#include <stm32f103xb.h>
+#include <clock.h>
 
-void HardFault_Handler() {
-    // Stub hard fault handler
-    while (1) {}
-}
-
-void Delay(unsigned t) {
-    // TODO: Use Sys Clock instead
-    volatile unsigned i = 0;
-    for (; i < t; ++i);
-}
+#include <stm32f1xx.h>
 
 int main() {
+    Clock_Init();
     // Blinks the led just for now
     RCC->APB2ENR |= (1ul << 4);
 
@@ -19,9 +11,9 @@ int main() {
     GPIOC->CRH |= 0x6ul << 20;
     while (1) {
         GPIOC->BSRR |= 1ul << 13;
-        Delay(500000);
+        Clock_Delay(500000);
         GPIOC->BRR |= 1ul << 13;
-        Delay(500000);
+        Clock_Delay(500000);
     }
     return 0;
 }
