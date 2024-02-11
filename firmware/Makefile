@@ -31,14 +31,14 @@ all: build/firmware.hex
 build/firmware.hex: build/firmware.elf
 	arm-none-eabi-objcopy -O ihex $< $@
 
-build/firmware.elf: build/.ran-cmake
+build/firmware.elf: build/.ran-cmake FORCE
 	+$(BUILD_TOOL) -C build
 
 cmake:
 	touch CMakeLists.txt
 	$(MAKE) build/.ran-cmake
 
-build/.ran-cmake: CMakeLists.txt
+build/.ran-cmake:
 	mkdir -p build
 	cd build && $(CMAKE) -G '$(CMAKE_GENERATOR)' $(CMAKE_FLAGS) $(MAKEFILE_DIR)
 	touch $@
@@ -51,5 +51,7 @@ clean:
 
 distclean:
 	rm -rf build/
+
+FORCE: ;
 
 .PHONY: all cmake clean flash distclean
