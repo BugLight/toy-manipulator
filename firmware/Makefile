@@ -6,7 +6,9 @@ MAKEFILE_DIR  := $(dir $(MAKEFILE_PATH))
 CMAKE ?= cmake
 CMAKE_BUILD_TYPE ?= Debug
 CMAKE_TOOLCHAIN_FILE ?= $(MAKEFILE_DIR)cmake/arm-gcc-toolchain.cmake
-CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) -DCMAKE_TOOLCHAIN_FILE=$(CMAKE_TOOLCHAIN_FILE)
+CMAKE_FLAGS += -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) \
+			   -DCMAKE_TOOLCHAIN_FILE=$(CMAKE_TOOLCHAIN_FILE) \
+			   -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE
 
 CMAKE_GENERATOR ?= $(shell (command -v ninja > /dev/null 2>&1 && echo "Ninja") || echo "Unix Makefiles")
 
@@ -47,4 +49,7 @@ flash: build/firmware.hex
 clean:
 	+test -d build && $(BUILD_TOOL) -C build clean || true
 
-.PHONY: all cmake clean flash
+distclean:
+	rm -rf build/
+
+.PHONY: all cmake clean flash distclean
